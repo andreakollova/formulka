@@ -1698,8 +1698,34 @@ body {
     } catch { return false; }
   }
 
+  /* ── Cache (stale-while-revalidate) ── */
+  const CACHE_KEY = 'pitwall_f1_cache';
+
+  function saveCache(data) {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch {}
+  }
+
+  function loadCache() {
+    try { return JSON.parse(localStorage.getItem(CACHE_KEY)); } catch { return null; }
+  }
+
+  function renderAll(drivers, constructors, lastRace, nextRace) {
+    if (drivers.length)      renderDrivers(drivers);
+    if (constructors.length) renderConstructors(constructors);
+    if (lastRace)            renderLastRace(lastRace);
+    renderStats(drivers, lastRace);
+    if (nextRace)            updateCountdown(nextRace);
+    renderTicker(drivers, constructors, nextRace, lastRace);
+  }
+
   /* ── Main load ── */
   async function loadAll() {
+    // Show cached data instantly if available
+    const cached = loadCache();
+    if (cached) {
+      renderAll(cached.drivers, cached.constructors, cached.lastRace, cached.nextRace);
+    }
+
     try {
       const [drvRes, conRes, lastRes] = await Promise.all([
         get(`${JOLPICA}/driverStandings.json`),
@@ -1711,19 +1737,14 @@ body {
       const constructors = conRes.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings  || [];
       const lastRace     = lastRes.MRData.RaceTable.Races[0] || null;
 
-      if (drivers.length)      renderDrivers(drivers);
-      if (constructors.length) renderConstructors(constructors);
-      if (lastRace)            renderLastRace(lastRace);
-      renderStats(drivers, lastRace);
-
       let nextRace = null;
       try {
         const nextRes = await get(`${JOLPICA}/next.json`);
         nextRace = nextRes.MRData.RaceTable.Races[0] || null;
-        if (nextRace) updateCountdown(nextRace);
-      } catch { /* no next race (end of season) */ }
+      } catch {}
 
-      renderTicker(drivers, constructors, nextRace, lastRace);
+      renderAll(drivers, constructors, lastRace, nextRace);
+      saveCache({ drivers, constructors, lastRace, nextRace });
 
     } catch(e) {
       console.warn('[PitWall] API error:', e);
