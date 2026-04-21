@@ -1770,7 +1770,7 @@ body {
     // Try Supabase first
     if (SB_URL && !SB_URL.includes('YOUR_PROJECT')) {
       try {
-        const url = `${SB_URL}/rest/v1/pitwall_news?select=tag,headline,summary,url,scraped_at&order=scraped_at.desc&limit=4`;
+        const url = `${SB_URL}/rest/v1/pitwall_news?select=tag,headline,summary,url,scraped_at&order=scraped_at.desc&limit=5`;
         const resp = await fetch(url, {
           headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
         });
