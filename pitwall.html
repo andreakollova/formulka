@@ -1329,23 +1329,23 @@ body {
   <div class="stats-grid">
     <div class="stat">
       <div class="stat-label">Championship Lead</div>
-      <div class="stat-big"><em>+9</em> pts</div>
-      <div class="stat-sub">Antonelli over Russell</div>
+      <div class="stat-big">—</div>
+      <div class="stat-sub">Loading…</div>
     </div>
     <div class="stat">
-      <div class="stat-label">Fastest Lap 2026</div>
-      <div class="stat-big">1:28.411</div>
-      <div class="stat-sub">Russell · Japan Q3</div>
+      <div class="stat-label">Fastest Lap</div>
+      <div class="stat-big">—</div>
+      <div class="stat-sub">Loading…</div>
     </div>
     <div class="stat">
-      <div class="stat-label">Fastest Pit Stop</div>
-      <div class="stat-big">1.94<em>s</em></div>
-      <div class="stat-sub">McLaren · Japanese GP</div>
+      <div class="stat-label">Last Race</div>
+      <div class="stat-big">—</div>
+      <div class="stat-sub">Loading…</div>
     </div>
     <div class="stat">
-      <div class="stat-label">Verstappen Gap</div>
-      <div class="stat-big">P9 <em>·</em> −60</div>
-      <div class="stat-sub">Worst start since 2017</div>
+      <div class="stat-label">Gap to Leader</div>
+      <div class="stat-big">—</div>
+      <div class="stat-sub">Loading…</div>
     </div>
   </div>
 </section>
@@ -1584,31 +1584,50 @@ body {
     const stats = document.querySelectorAll('.stat');
     if (!stats.length) return;
 
+    const set = (el, label, big, sub) => {
+      el.querySelector('.stat-label').textContent = label;
+      el.querySelector('.stat-big').innerHTML     = big;
+      el.querySelector('.stat-sub').textContent   = sub;
+    };
+
+    // Championship lead
     if (drivers.length >= 2) {
       const gap = +drivers[0].points - +drivers[1].points;
-      stats[0].querySelector('.stat-big').innerHTML = `<em>+${gap}</em> pts`;
-      stats[0].querySelector('.stat-sub').textContent =
-        `${drivers[0].Driver.familyName} over ${drivers[1].Driver.familyName}`;
+      set(stats[0],
+        'Championship Lead',
+        `<em>+${gap}</em> pts`,
+        `${drivers[0].Driver.familyName} over ${drivers[1].Driver.familyName}`
+      );
     }
 
     if (lastRace) {
+      // Fastest lap
       const fl = lastRace.Results.find(r => r.FastestLap?.rank === '1');
       if (fl) {
-        stats[1].querySelector('.stat-big').textContent = fl.FastestLap.Time.time;
-        stats[1].querySelector('.stat-sub').textContent =
-          `${fl.Driver.familyName} · ${lastRace.raceName}`;
+        set(stats[1],
+          'Fastest Lap',
+          fl.FastestLap.Time.time,
+          `${fl.Driver.familyName} · ${lastRace.raceName}`
+        );
       }
-      stats[2].querySelector('.stat-big').innerHTML = `R<em>${lastRace.round}</em>`;
-      stats[2].querySelector('.stat-sub').textContent = `${lastRace.raceName} completed`;
+
+      // Last race
+      set(stats[2],
+        'Last Race',
+        `R<em>${lastRace.round}</em>`,
+        `${lastRace.raceName} completed`
+      );
     }
 
+    // P9 vs leader
     if (drivers.length >= 9) {
-      const p1 = +drivers[0].points;
-      const p9 = drivers[8];
-      stats[3].querySelector('.stat-big').innerHTML =
-        `P9 <em>·</em> −${p1 - +p9.points}`;
-      stats[3].querySelector('.stat-sub').textContent =
-        `${p9.Driver.familyName} vs leader`;
+      const p1pts = +drivers[0].points;
+      const p9    = drivers[8];
+      set(stats[3],
+        `${p9.Driver.familyName} Gap`,
+        `P9 <em>·</em> −${p1pts - +p9.points}`,
+        `${p9.Driver.familyName} vs leader`
+      );
     }
   }
 
