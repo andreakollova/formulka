@@ -1,0 +1,16 @@
+services:
+  - type: cron
+    name: pitwall-scraper
+    env: python
+    region: frankfurt
+    plan: free
+    schedule: "0 6,10,14,18,22 * * *"   # 5x daily — 06:00 10:00 14:00 18:00 22:00 UTC
+    buildCommand: pip install -r scraper/requirements.txt
+    startCommand: python scraper/espn_scraper.py
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false

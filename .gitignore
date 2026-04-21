@@ -1,0 +1,7 @@
+scraper/venv/
+scraper/.env
+scraper/seen_articles.json
+news.json
+.idea/
+__pycache__/
+*.pyc
